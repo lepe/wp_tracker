@@ -52,7 +52,7 @@ if ( ! defined( 'WP_PLUGIN_DIR' ) ) define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/
 
 if ( basename(dirname(__FILE__)) == 'plugins' )
 	define("GT_PLUGIN_DIR",'');
-else define("GT_PLUGIN_DIR" , basename(dirname(__FILE__)) . '/');
+else define("GT_PLUGIN_DIR" , basename(dirname(__FILE__)) );
 define("GT_PLUGIN_PATH", WP_PLUGIN_URL . "/" . GT_PLUGIN_DIR);
 
 /* Add new menu */
@@ -64,7 +64,7 @@ add_action('admin_menu', 'tracker_add_pages');
 ******** BEGIN PLUGIN FUNCTIONS ********
 
 */
-function gt_scripts_method() {
+function gt_scripts() {
     wp_enqueue_script(
         'high_charts',
         GT_PLUGIN_PATH . '/js/hcharts.js',
@@ -101,14 +101,21 @@ function gt_scripts_method() {
         array( 'jquery','chic','general' )
     );
 }
+function gt_admin_scripts() {
+    wp_enqueue_style( 
+        'admin', 
+        GT_PLUGIN_PATH . '/css/admin.css' 
+    );
+}
 
-add_action( 'wp_enqueue_scripts', 'gt_scripts_method' );
+add_action( 'wp_enqueue_scripts', 'gt_scripts' );
+add_action( 'admin_enqueue_scripts', 'gt_admin_scripts' );
 
 // function for: 
 function tracker_add_pages() {
 
   // anyone can see the menu for the Tracker Plugin
-  add_menu_page('Granger Tracker','Granger Tracker', 'read', 'tracker_overview', 'tracker_overview', GT_PLUGIN_PATH.'images/icon.png');
+  add_menu_page('Granger Tracker','Granger Tracker', 'read', 'tracker_overview', 'tracker_overview');
   // http://codex.wordpress.org/Function_Reference/add_menu_page
 
   // this is just a brief introduction
