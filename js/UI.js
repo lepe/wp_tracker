@@ -13,12 +13,6 @@ var UI = Class.extend({
             callback(widget, data);
         });
     },
-    _getTemplate : function(widget, callback) {
-        $.get("/htm/"+widget.template+".htm").done(function(res){
-            widget.html = res;
-            callback(widget);
-        });
-    },
     //Apply data and directives into the template and insert it 
     _transform : function(widget, set, callback) {
         var $html = $(widget.html);
@@ -53,12 +47,11 @@ var UI = Class.extend({
             var widget = ui.widgets[w];
 			if($parent === undefined || $parent.is(widget.parent) || $parent.find(widget.parent).length) {
 				//TODO: place "loading" in parent
-				ui._getTemplate(widget, function(widget) {
-					widget.setup();
-					ui._query(widget, function(widget, data) {
-						widget.render(data,function(set, callback) {
-							ui._transform(widget, set, callback);
-						});
+				widget.setup();
+				ui._query(widget, function(widget, res) {
+					widget.html = res.html; //template is returned from PHP
+					widget.render(res.data,function(set, callback) {
+						ui._transform(widget, set, callback);
 					});
 				});
 			}
