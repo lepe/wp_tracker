@@ -49,15 +49,12 @@ if ( ! defined( 'WP_SITEURL' ) ) define( 'WP_SITEURL', get_option("siteurl") );
 if ( ! defined( 'WP_CONTENT_DIR' ) ) define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
 if ( ! defined( 'WP_PLUGIN_URL' ) ) define( 'WP_PLUGIN_URL', WP_CONTENT_URL. '/plugins' );
 if ( ! defined( 'WP_PLUGIN_DIR' ) ) define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
+if ( ! defined( 'WP_CACHE_DIR' ) ) define( 'WP_CACHE_DIR', WP_CONTENT_DIR . '/cache' );
+if ( ! defined( 'WP_CACHE_URL' ) ) define( 'WP_CACHE_URL', WP_CONTENT_URL. '/cache' );
 
-if ( basename(dirname(__FILE__)) == 'plugins' )
-	define("GT_PLUGIN_DIR",'');
-else define("GT_PLUGIN_DIR" , basename(dirname(__FILE__)) );
-define("GT_PLUGIN_PATH", WP_PLUGIN_URL . "/" . GT_PLUGIN_DIR);
-
-/* Add new menu */
-add_action('admin_menu', 'tracker_add_pages');
-// http://codex.wordpress.org/Function_Reference/add_action
+define("GT_PLUGIN_NAME" , basename(dirname(__FILE__)) );
+define("GT_PLUGIN_DIR" , WP_PLUGIN_DIR . "/" . GT_PLUGIN_NAME);
+define("GT_PLUGIN_URL" , WP_PLUGIN_URL . "/" . GT_PLUGIN_NAME);
 
 /*
 
@@ -65,51 +62,46 @@ add_action('admin_menu', 'tracker_add_pages');
 
 */
 function gt_scripts() {
+    $bundle = array(
+        "hcharts.js",
+        "hchartheme.js",
+        "transparency.js",
+        "chic.js",
+        "require.js",
+        "general.js",
+        "UI.js"
+    );
+    if(is_writable(WP_CACHE_DIR)) {
+        $bundle_fn = WP_CACHE_DIR . "/gt_bundle.js";
+        $mtime = file_exists($bundle_fn) ? filemtime($bundle_fn) : 0;
+        foreach($bundle as $bfile) {
+            if(filemtime(GT_PLUGIN_DIR . '/js/' . $bfile) > $mtime) {
+                //require_once("php/jsminify.php");
+                @unlink($bundle_fn);
+                foreach($bundle as $bfile) {
+                    //file_put_contents($bundle_fn, "/** $bfile  **/\n".JSMin::minify(file_get_contents(GT_PLUGIN_DIR . '/js/' . $bfile))."\n", FILE_APPEND);
+                    file_put_contents($bundle_fn, "/** $bfile  **/\n".file_get_contents(GT_PLUGIN_DIR . '/js/' . $bfile)."\n", FILE_APPEND);
+                }
+                break;
+            }
+        }
+    }
     wp_enqueue_script(
-        'high_charts',
-        GT_PLUGIN_PATH . '/js/hcharts.js',
+        'gt_bundle',
+        WP_CACHE_URL . '/gt_bundle.js',
         array( 'jquery' )
     );
-    wp_enqueue_script(
-        'high_charts_theme',
-        GT_PLUGIN_PATH . '/js/hchartheme.js',
-        array( 'high_charts' )
-    );
-    wp_enqueue_script(
-        'transparency',
-        GT_PLUGIN_PATH . '/js/transparency.js',
-        array( 'jquery' )
-    );
-    wp_enqueue_script(
-        'chic',
-        GT_PLUGIN_PATH . '/js/chic.js',
-        array( 'jquery' )
-    );
-    wp_enqueue_script(
-        'require',
-        GT_PLUGIN_PATH . '/js/require.js',
-        array( 'jquery' )
-    );
-    wp_enqueue_script(
-        'general',
-        GT_PLUGIN_PATH . '/js/general.js',
-        array( 'jquery','chic' )
-    );
-    wp_enqueue_script(
-        'ui',
-        GT_PLUGIN_PATH . '/js/UI.js',
-        array( 'jquery','chic','general' )
+    wp_enqueue_style( 
+        'gt_theme', 
+        get_template_directory_uri() . '/css/tracker.css' 
     );
 }
 function gt_admin_scripts() {
     wp_enqueue_style( 
-        'admin', 
-        GT_PLUGIN_PATH . '/css/admin.css' 
+        'gt_admin', 
+        GT_PLUGIN_URL . '/css/admin.css' 
     );
 }
-
-add_action( 'wp_enqueue_scripts', 'gt_scripts' );
-add_action( 'admin_enqueue_scripts', 'gt_admin_scripts' );
 
 // function for: 
 function tracker_add_pages() {
@@ -125,12 +117,26 @@ function tracker_add_pages() {
 }
 
 function tracker_overview() {
-?>
-<div class="wrap"><h2>Granger Tracker Overview</h2>
-<p>Nothing yet</p>
-</div>
-<?php
-exit;
+    echo file_get_contents(__DIR__. "/htm/admin.html");
+    exit;
+}
+/* Add new menu */
+add_action('admin_menu', 'tracker_add_pages');
+add_action( 'admin_enqueue_scripts', 'gt_admin_scripts' );
+
+$slugs = array(
+    "servers",
+    "players",
+    "clans"
+);
+$slug = rtrim(ltrim($_SERVER["REQUEST_URI"],"/"),"/");
+if(in_array($slug,$slugs)) {
+    add_action( 'wp_enqueue_scripts', 'gt_scripts' );
+    wp_enqueue_script(
+        'gt_loader',
+        GT_PLUGIN_URL . "/js/$slug.js",
+        array( 'gt_bundle' )
+    );
 }
 
 ?>

@@ -1,6 +1,6 @@
 var UI = Class.extend({
     elem : null,
-    baseurl  : "/php/proxy.php",
+    proxy : gt_plugin_path+"/php/proxy.php",
     widgets : [],
     //Initialize the Widget with initparam (used to recycle widget)
     init: function() {
@@ -9,7 +9,8 @@ var UI = Class.extend({
     //Retrieve data from server
     _query : function(widget, callback) {
         widget.params.cat = widget.category;
-        $.getJSON(this.baseurl, widget.params).done(function(data) {
+        widget.params.tpl = widget.template;
+        $.getJSON(this.proxy, widget.params).done(function(data) {
             callback(widget, data);
         });
     },

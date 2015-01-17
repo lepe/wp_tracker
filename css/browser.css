@@ -49,5 +49,5 @@ b.country { display: none; }
     width: 610px;
 }
 #msg.warn {
-	background: url(/img/warn.png) no-repeat 10px rgba(255, 255, 255, 0.1);
+	background: url(../img/warn.png) no-repeat 10px rgba(255, 255, 255, 0.1);
 }

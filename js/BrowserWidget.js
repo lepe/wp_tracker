@@ -40,7 +40,7 @@ define(
                               },
                               flag: {
                                 src : function() { 
-                                    return "img/countries/"+this.country.toLowerCase()+".png"; 
+                                    return gt_plugin_path+"/img/countries/"+this.country.toLowerCase()+".png"; 
                                 },
 								alt : function() { 
                                     return this.country; 
@@ -76,7 +76,7 @@ define(
 									  return this.ingame > 0 ? "#" : null;
 								  },
 								  text : function() {
-									  return this.ingame+" / "+this.max_players;
+									  return (this.ingame || this.v_ingame)+" / "+this.max_players; //compatibility with alpha version TODO: remove v_ingame
 								  }
 							  },
 							  bots : {

@@ -112,8 +112,9 @@ String.prototype.decolorfy = function() {
 
 var $ = jQuery;
 var Class = chic.Class;
+var gt_plugin_path = '/wp-content/plugins/granger-tracker';
 
 requirejs.config({
-    baseUrl: '/js'
+    baseUrl: gt_plugin_path+'/js/'
 });
 
